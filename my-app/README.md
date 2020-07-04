@@ -66,3 +66,11 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `npm run build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+
+###Implemented functionalities:
+
+1. search by city
+2. search by user geolocation
+3. forecast version switch
+4. nice weather classification
+5. light/dark mode
