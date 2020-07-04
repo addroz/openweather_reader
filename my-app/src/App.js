@@ -51,10 +51,6 @@ document.store = store
 class App extends React.Component {
 
     render() {
-        navigator.geolocation.getCurrentPosition((position) => {
-            console.log(position)
-        })
-
         return (
             <div className="App">
                 <header className="App-header">
