@@ -1,8 +1,8 @@
-import React from 'react';
-import './App.css';
-import {CitySelect} from './features/citySelect/citySelect.js';
-import {createStore} from 'redux'
-const apiKey = '2f43081da337fcebfc53e06c931c16a5';
+import React from 'react'
+import './App.css'
+import {CitySelect} from './features/citySelect/CitySelect.js'
+import {ModeSelect} from "./features/modeSelect/ModeSelect";
+import {createStore} from "redux"
 
 const MODE = {
     LIGHT: "light",
@@ -11,15 +11,20 @@ const MODE = {
 
 const initialSelection = {
     cityId: -1,
+    weather: 'Nie wybrano żadnego miasta',
     mode: MODE.LIGHT
 }
 
 function changeMode(state) {
     if (state.mode === MODE.LIGHT) {
+        document.body.style.backgroundColor = 'black'
+        document.body.style.color = 'ivory'
         return {
             ...state, mode: MODE.DARK
         }
     } else {
+        document.body.style.backgroundColor = 'ivory'
+        document.body.style.color = 'black'
         return {
             ...state, mode: MODE.LIGHT
         }
@@ -40,32 +45,28 @@ function counter(state = initialSelection, action) {
     return state
 }
 
-function getWeather(cityId) {
-    fetch('https://api.openweathermap.org/data/2.5/weather?id=' + cityId + '&appid=' + apiKey)
-        .then((response) => response.json())
-        .then((data) => console.log(data))
-        .catch((err) => console.log(err));
-}
-
 const store = createStore(counter)
 document.store = store
 
-function App() {
+class App extends React.Component {
 
-    navigator.geolocation.getCurrentPosition((position) => {
-        console.log(position)
-    })
+    render() {
+        navigator.geolocation.getCurrentPosition((position) => {
+            console.log(position)
+        })
 
-    return (
-        <div className="App">
-            <header className="App-header">
-                <CitySelect/>
-            </header>
-            <footer>
-                Author: Adam Drożyński, 395133
-            </footer>
-        </div>
-      );
+        return (
+            <div className="App">
+                <header className="App-header">
+                    <ModeSelect/>
+                    <CitySelect/>
+                </header>
+                <footer>
+                    Author: Adam Drożyński, 395133
+                </footer>
+            </div>
+        );
+    }
 }
 
 export default App;
