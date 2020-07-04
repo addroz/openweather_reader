@@ -57,6 +57,36 @@ export class CitySelect extends Component {
         }
     }
 
+    computeNiceness(data) {
+        let niceness = 0
+
+        niceness++
+        for (let i = 0; i < 7; ++i) {
+            if (Object.values(data.daily)[i].weather[0].main === 'Rain') {
+                niceness--
+                break
+            }
+        }
+
+        let avg = 0
+        for (let i = 0; i < 7; ++i) {
+            avg += (Object.values(data.daily)[i].temp.day - 272.15)
+        }
+        avg /= 7
+        if(avg >= 18 && avg <= 25) niceness ++
+
+        niceness++
+        for (let i = 0; i < 7; ++i) {
+            if (Object.values(data.daily)[i].temp.day - 272.15 > 30 ||
+                Object.values(data.daily)[i].temp.day - 272.15 < 15) {
+                niceness--
+                break
+            }
+        }
+
+        return niceness
+    }
+
     getLat(id) {
         for(let i = 0; i < this.cityList.length; ++i) {
             if (this.cityList[i].id === id) return this.cityList[i].lat
@@ -78,7 +108,7 @@ export class CitySelect extends Component {
             .then((data) => {
                 console.log(data)
                 this.setState({weather: this.prepareWeatherData(data), cachedData: this.state.cachedData,
-                    forecastMode: this.state.forecastMode, lon: lon, lat: lat, value: this.state.value})
+                    forecastMode: this.state.forecastMode, lon: lon, lat: lat, value: this.state.value, niceness: this.computeNiceness(data)})
             })
             .catch((err) => console.log(err));
     }
@@ -95,23 +125,24 @@ export class CitySelect extends Component {
             value: '',
             weather: 'No city selected',
             cachedData: [],
-            forecastMode: FORECAST_MODE.HOURLY
+            forecastMode: FORECAST_MODE.HOURLY,
+            niceness: 0
         }
     }
 
     setForecastModeHourly() {
-        this.setState({weather: this.state.weather, cachedData: this.state.cachedData,
+        this.setState({weather: this.state.weather, cachedData: this.state.cachedData, niceness : this.state.niceness,
             forecastMode: FORECAST_MODE.HOURLY, lon: this.state.lon, lat: this.state.lat, value: this.state.value})
     }
 
     setForecastModeDaily() {
-        this.setState({weather: this.state.weather, cachedData: this.state.cachedData,
+        this.setState({weather: this.state.weather, cachedData: this.state.cachedData, niceness : this.state.niceness,
             forecastMode: FORECAST_MODE.DAILY, lon: this.state.lon, lat: this.state.lat, value: this.state.value})
     }
 
     showPosition(parent, position) {
         document.position = position
-        parent.setState({weather: parent.state.weather, cachedData: parent.state.cachedData,
+        parent.setState({weather: parent.state.weather, cachedData: parent.state.cachedData, niceness : this.state.niceness,
             forecastMode: parent.state.forecastMode, lon: position.coords.longitude, lat: position.coords.latitude, value: parent.state.value})
         console.log("Latitude: " + position.coords.latitude +
             "<br>Longitude: " + position.coords.longitude)
@@ -122,7 +153,7 @@ export class CitySelect extends Component {
             console.log("Error - Localization not loaded")
             return
         }
-        this.setState({weather: this.state.weather, cachedData: this.state.cachedData,
+        this.setState({weather: this.state.weather, cachedData: this.state.cachedData, niceness : this.state.niceness,
             forecastMode: this.state.forecastMode, lon: document.position.coords.longitude, lat: document.position.coords.latitude,
             value: this.state.value})
         this.getWeather(document.position.coords.longitude, document.position.coords.latitude)
@@ -145,21 +176,44 @@ export class CitySelect extends Component {
         }
     }
 
+    getNiceness() {
+        if (this.state.lon === 0 && this.state.lat === 0) {
+            return (
+                <div></div>
+            )
+        }
+        let result = ""
+
+        if (this.state.niceness === 3) {
+            result = "nice"
+        } else if (this.state.niceness === 2) {
+            result = "passable"
+        } else {
+            result = "not nice"
+        }
+
+        return (
+            <div>
+                Generally weather in the upcoming week will be: {result}
+            </div>
+        )
+    }
+
     render() {
         return (
             <div>
                 <div>
                     <button name="forecast" onClick={e => {
-                        this.setState({weather: this.state.weather, cachedData:
-                        this.state.cachedData, forecastMode: FORECAST_MODE.HOURLY, lon: this.state.lon, lat: this.state.lat,
+                        this.setState({weather: this.state.weather, cachedData: this.state.cachedData, niceness : this.state.niceness,
+                            forecastMode: FORECAST_MODE.HOURLY, lon: this.state.lon, lat: this.state.lat,
                         value: this.state.value})
                         this.getWeather(this.state.lon, this.state.lat)}}>
 
                         Forecast - hourly
                     </button>
                     <button name="forecast" onClick={e => {
-                        this.setState({weather: this.state.weather, cachedData:
-                        this.state.cachedData, forecastMode: FORECAST_MODE.DAILY, lon: this.state.lon, lat: this.state.lat,
+                        this.setState({weather: this.state.weather, cachedData: this.state.cachedData, niceness : this.state.niceness,
+                        forecastMode: FORECAST_MODE.DAILY, lon: this.state.lon, lat: this.state.lat,
                         value: this.state.value})
                         this.getWeather(this.state.lon, this.state.lat)}}>
 
@@ -190,16 +244,19 @@ export class CitySelect extends Component {
                     onChange={e => {
                         this.setState({
                             value: e.target.value, weather: this.state.weather, cachedData: this.state.cachedData,
-                            forecastMode: this.state.forecastMode, lon: this.state.lon, lat: this.state.lat
+                            forecastMode: this.state.forecastMode, lon: this.state.lon, lat: this.state.lat, niceness : this.state.niceness,
                         })
                     }}
                     onSelect={(value, item) => {
                         this.changeSelectedCity(item.id)
                         this.setState({weather: '', cachedData: this.state.cachedData, forecastMode: this.state.forecastMode,
-                            lon: item.lon, lat: item.lat, value: value})
+                            lon: item.lon, lat: item.lat, value: value, niceness : this.state.niceness,})
                         this.getWeather(item.lon, item.lat)
                     }}
                 />
+                <div>
+                    {this.getNiceness()}
+                </div>
                 <div>
                     {this.state.weather}
                 </div>
