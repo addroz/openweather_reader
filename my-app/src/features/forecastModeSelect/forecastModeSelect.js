@@ -3,7 +3,20 @@ import {connect} from "react-redux";
 import {changeForecastModeDaily, changeForecastModeHourly, weatherLoaded} from "../../actions";
 import {getWeather} from "../weatherFetcher";
 import {FORECAST_MODE} from "../../const";
+import styled from "styled-components";
 
+const StyledButton = styled.button`
+    border: 0px outset;
+    background-color: ivory;
+    color: black;
+    width: 50;
+    height: 30;
+    cursor:pointer;
+    &:hover {
+        background-color: black;
+        color:ivory;
+    }
+`
 
 const mapDispatchToProps = dispatch => {
     return {
@@ -29,20 +42,20 @@ const mapStateToProps = state => {
 let ForecastModeSelect = ({lat, lon, modeHourly, modeDaily, weatherLoaded}) => {
     return (
         <div>
-            <button name="forecast" onClick={e => {
-                getWeather(lat, lon, weatherLoaded, FORECAST_MODE.HOURLY)
+            <StyledButton name="forecast" onClick={e => {
                 modeHourly()
+                getWeather(lat, lon, weatherLoaded, FORECAST_MODE.HOURLY)
             }}>
 
                 Forecast - hourly
-            </button>
-            <button name="forecast" onClick={e => {
-                getWeather(lat, lon, weatherLoaded, FORECAST_MODE.DAILY)
+            </StyledButton>
+            <StyledButton name="forecast" onClick={e => {
                 modeDaily()
+                getWeather(lat, lon, weatherLoaded, FORECAST_MODE.DAILY)
             }}>
 
                 Forecast - daily
-            </button>
+            </StyledButton>
         </div>
     );
 }

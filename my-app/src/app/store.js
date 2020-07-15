@@ -52,7 +52,7 @@ export function counter(state = initialSelection, action) {
 
   if (action.type === ACTIONS.CHANGE_FORECAST_MODE) {
     return {
-      ...state, weather: action.weather, niceness: action.niceness
+      ...state, forecastMode: action.mode
     }
   }
 
